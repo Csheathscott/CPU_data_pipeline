@@ -18,14 +18,17 @@ def get_cpu_data():
     Returns:
         dict: Dictionary containing CPU metrics
     """
-    cpu_percent = psutil.cpu_percent(interval=1, percpu=False)
-    cpu_percent_per_core = psutil.cpu_percent(interval=0, percpu=True)
+    # Get per-core CPU percentages (which includes overall as well when percpu=True)
+    cpu_percent_per_core = psutil.cpu_percent(interval=1, percpu=True)
+    # Calculate overall CPU usage as average of all cores
+    cpu_percent = sum(cpu_percent_per_core) / len(cpu_percent_per_core)
+    
     cpu_freq = psutil.cpu_freq()
     cpu_count = psutil.cpu_count()
     
     data = {
         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'cpu_percent': cpu_percent,
+        'cpu_percent': round(cpu_percent, 2),
         'cpu_count': cpu_count,
         'cpu_freq_current': cpu_freq.current if cpu_freq else None,
         'cpu_freq_min': cpu_freq.min if cpu_freq else None,
